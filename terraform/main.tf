@@ -27,7 +27,7 @@ resource "azurerm_resource_group" "sentinel_rg" {
 }
 
 ############################################
-# LOG ANALYTICS WORKSPACE (Sentinel backend)
+# LOG ANALYTICS WORKSPACE
 ############################################
 resource "azurerm_log_analytics_workspace" "sentinel_workspace" {
   name                = "${var.prefix}-sentinel-workspace"
@@ -47,17 +47,17 @@ resource "azurerm_sentinel_log_analytics_workspace_onboarding" "sentinel" {
 }
 
 ############################################
-# KEY VAULT (secrets storage)
+# KEY VAULT
 ############################################
 resource "azurerm_key_vault" "sentinel_kv" {
-  name                        = "${var.prefix}-sentinel-kv"
-  location                    = azurerm_resource_group.sentinel_rg.location
-  resource_group_name         = azurerm_resource_group.sentinel_rg.name
-  sku_name                    = "standard"
-  tenant_id                   = var.tenant_id
-  purge_protection_enabled    = true
-  soft_delete_retention_days  = 90
-  enable_rbac_authorization   = true
+  name                       = "${var.prefix}-sentinel-kv"
+  location                   = azurerm_resource_group.sentinel_rg.location
+  resource_group_name        = azurerm_resource_group.sentinel_rg.name
+  sku_name                   = "standard"
+  tenant_id                  = var.tenant_id
+  purge_protection_enabled   = true
+  soft_delete_retention_days = 90
+  enable_rbac_authorization  = true
 
   network_acls {
     default_action = "Deny"
@@ -68,7 +68,7 @@ resource "azurerm_key_vault" "sentinel_kv" {
 }
 
 ############################################
-# SERVICE BUS (alert routing)
+# SERVICE BUS
 ############################################
 resource "azurerm_servicebus_namespace" "sentinel_sb" {
   name                = "${var.prefix}-sentinel-sb"
@@ -80,16 +80,15 @@ resource "azurerm_servicebus_namespace" "sentinel_sb" {
 }
 
 resource "azurerm_servicebus_queue" "high_risk_alerts" {
-  name         = "high-risk-alerts"
-  namespace_id = azurerm_servicebus_namespace.sentinel_sb.id
-
-  enable_partitioning   = true
-  max_delivery_count    = 5
-  lock_duration         = "PT5M"
+  name               = "high-risk-alerts"
+  namespace_id       = azurerm_servicebus_namespace.sentinel_sb.id
+  enable_partitioning = true
+  max_delivery_count = 5
+  lock_duration      = "PT5M"
 }
 
 ############################################
-# STORAGE ACCOUNT (findings archive)
+# STORAGE ACCOUNT
 ############################################
 resource "azurerm_storage_account" "findings_store" {
   name                     = "${var.prefix}findings"
